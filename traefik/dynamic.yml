@@ -1,0 +1,26 @@
+http:
+  middlewares:
+    secure-headers:
+      headers:
+        stsSeconds: 31536000
+        stsIncludeSubdomains: true
+        contentTypeNosniff: true
+        browserXssFilter: true
+        frameDeny: true
+        referrerPolicy: "strict-origin-when-cross-origin"
+        contentSecurityPolicy: "default-src 'self'"
+
+    dashboard-auth:
+      basicAuth:
+        users:
+          - "${TRAEFIK_DASHBOARD_AUTH}"
+
+    staging-api-rewrite:
+      replacePathRegex:
+        regex: "^/staging-api/(.*)"
+        replacement: "/api/$1"
+
+    staging-front-strip:
+      stripPrefix:
+        prefixes:
+          - "/staging"
