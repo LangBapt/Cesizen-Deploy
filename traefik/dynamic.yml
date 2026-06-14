@@ -12,8 +12,7 @@ http:
 
     dashboard-auth:
       basicAuth:
-        users:
-          - "${TRAEFIK_DASHBOARD_AUTH}"
+        usersFile: /etc/traefik/users.htpasswd
 
     staging-api-rewrite:
       replacePathRegex:

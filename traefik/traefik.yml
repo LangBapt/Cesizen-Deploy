@@ -23,6 +23,6 @@ providers:
 certificatesResolvers:
   letsencrypt:
     acme:
-      email: ${ACME_EMAIL}
+      email: baptiste.langlois@viacesi.fr
       storage: /letsencrypt/acme.json
       tlsChallenge: {}
