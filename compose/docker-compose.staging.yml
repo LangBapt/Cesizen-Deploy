@@ -19,7 +19,7 @@ services:
       - "traefik.http.routers.api-staging.rule=PathPrefix(`/staging-api`)"
       - "traefik.http.routers.api-staging.entrypoints=websecure"
       - "traefik.http.routers.api-staging.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.api-staging.priority=20"
+      - "traefik.http.routers.api-staging.priority=100"
       - "traefik.http.services.api-staging.loadbalancer.server.port=3000"
       - "traefik.http.middlewares.api-staging-strip.stripprefix.prefixes=/staging-api"
       - "traefik.http.routers.api-staging.middlewares=secure-headers@file,api-staging-strip"
