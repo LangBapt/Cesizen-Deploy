@@ -1,0 +1,104 @@
+name: Deploy
+
+on:
+  repository_dispatch:
+    types: [deploy-staging, deploy-prod]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environnement cible'
+        required: true
+        type: choice
+        options: [staging, prod]
+
+jobs:
+  deploy:
+    runs-on: [self-hosted, cesizen]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Determine environment
+        id: env
+        run: |
+          if [ "${{ github.event_name }}" = "repository_dispatch" ]; then
+            ENV="${{ github.event.action }}"
+            echo "env=${ENV#deploy-}" >> $GITHUB_OUTPUT
+          else
+            echo "env=${{ inputs.environment }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Write .env file
+        run: |
+          ENV="${{ steps.env.outputs.env }}"
+          if [ "$ENV" = "prod" ]; then
+            echo "${{ secrets.ENV_PROD }}" > compose/.env.prod
+          else
+            echo "${{ secrets.ENV_STAGING }}" > compose/.env.staging
+          fi
+
+      - name: Login to GHCR
+        run: |
+          echo "${{ secrets.GHCR_TOKEN }}" | \
+            docker login ghcr.io -u "${{ secrets.GHCR_USER }}" --password-stdin
+
+      - name: Pull new images
+        run: |
+          ENV="${{ steps.env.outputs.env }}"
+          docker compose \
+            -f compose/docker-compose.${ENV}.yml \
+            --env-file compose/.env.${ENV} \
+            pull
+
+      - name: Deploy
+        run: |
+          ENV="${{ steps.env.outputs.env }}"
+          docker compose \
+            -f compose/docker-compose.${ENV}.yml \
+            --env-file compose/.env.${ENV} \
+            up -d
+
+      - name: Run Prisma migrations
+        run: |
+          ENV="${{ steps.env.outputs.env }}"
+          if [ "$ENV" = "prod" ]; then
+            CONTAINER="api-prod"
+          else
+            CONTAINER="api-staging"
+          fi
+          docker exec "$CONTAINER" npx prisma migrate deploy
+
+      - name: Health check
+        run: |
+          sleep 15
+          ENV="${{ steps.env.outputs.env }}"
+          BASE="https://cesizen-baptiste.switzerlandnorth.cloudapp.azure.com"
+          if [ "$ENV" = "prod" ]; then
+            curl -f "${BASE}/api/health" || exit 1
+          else
+            curl -f "${BASE}/staging-api/api/health" || exit 1
+          fi
+
+      - name: Cleanup old images
+        run: docker image prune -f
+
+      - name: Notify Discord (success)
+        if: success()
+        run: |
+          ENV="${{ steps.env.outputs.env }}"
+          curl -s -H "Content-Type: application/json" \
+            -d "{\"content\": \"Déploiement **${ENV}** réussi — commit \`${{ github.sha }}\`\"}" \
+            "${{ secrets.DISCORD_WEBHOOK_URL }}" || true
+
+      - name: Notify Discord (failure)
+        if: failure()
+        run: |
+          ENV="${{ steps.env.outputs.env }}"
+          curl -s -H "Content-Type: application/json" \
+            -d "{\"content\": \"Déploiement **${ENV}** ÉCHOUÉ — \`${{ github.sha }}\` — ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}" \
+            "${{ secrets.DISCORD_WEBHOOK_URL }}" || true
+
+      - name: Remove .env files
+        if: always()
+        run: |
+          rm -f compose/.env.staging compose/.env.prod

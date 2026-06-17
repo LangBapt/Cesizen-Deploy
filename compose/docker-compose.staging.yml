@@ -1,0 +1,77 @@
+services:
+  api-staging:
+    image: ghcr.io/langbapt/cesizen-api:staging
+    container_name: api-staging
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      JWT_SECRET: ${JWT_SECRET}
+      ACCESS_TOKEN_SECRET: ${ACCESS_TOKEN_SECRET}
+      REFRESH_TOKEN_SECRET: ${REFRESH_TOKEN_SECRET}
+      NODE_ENV: production
+      PORT: 3000
+    networks:
+      - web
+      - internal-staging
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api-staging.rule=PathPrefix(`/staging-api`)"
+      - "traefik.http.routers.api-staging.entrypoints=websecure"
+      - "traefik.http.routers.api-staging.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.api-staging.middlewares=secure-headers@file,staging-api-rewrite@file"
+      - "traefik.http.routers.api-staging.priority=20"
+      - "traefik.http.services.api-staging.loadbalancer.server.port=3000"
+    depends_on:
+      - postgres-staging
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  backoffice-staging:
+    image: ghcr.io/langbapt/cesizen-backoffice:staging
+    container_name: backoffice-staging
+    restart: unless-stopped
+    networks:
+      - web
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backoffice-staging.rule=PathPrefix(`/staging`)"
+      - "traefik.http.routers.backoffice-staging.entrypoints=websecure"
+      - "traefik.http.routers.backoffice-staging.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.backoffice-staging.middlewares=secure-headers@file,staging-front-strip@file"
+      - "traefik.http.routers.backoffice-staging.priority=10"
+      - "traefik.http.services.backoffice-staging.loadbalancer.server.port=80"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  postgres-staging:
+    image: postgres:16-alpine
+    container_name: postgres-staging
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata-staging:/var/lib/postgresql/data
+    networks:
+      - internal-staging
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
+
+networks:
+  web:
+    external: true
+  internal-staging:
+    driver: bridge
+
+volumes:
+  pgdata-staging:
