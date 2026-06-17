@@ -1,6 +1,7 @@
 services:
   api-staging:
     image: ghcr.io/langbapt/cesizen-api:staging
+    container_name: api-staging
     restart: unless-stopped
     environment:
       DATABASE_URL: ${DATABASE_URL}
@@ -30,6 +31,7 @@ services:
 
   backoffice-staging:
     image: ghcr.io/langbapt/cesizen-backoffice:staging
+    container_name: backoffice-staging
     restart: unless-stopped
     networks:
       - web
@@ -49,6 +51,7 @@ services:
 
   postgres-staging:
     image: postgres:16-alpine
+    container_name: postgres-staging
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
