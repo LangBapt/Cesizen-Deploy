@@ -1,3 +1,5 @@
 traefik/users.htpasswd
 traefik/.env
 traefik/.env.example
+compose/.env.staging
+compose/.env.prod
