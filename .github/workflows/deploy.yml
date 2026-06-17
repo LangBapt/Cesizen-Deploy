@@ -74,9 +74,9 @@ jobs:
           ENV="${{ steps.env.outputs.env }}"
           BASE="https://cesizen-baptiste.switzerlandnorth.cloudapp.azure.com"
           if [ "$ENV" = "prod" ]; then
-            curl -k -f "${BASE}/api/health" || exit 1   # ◄--- Ajout de -k ici
+            curl -k -f "${BASE}/api/health" || exit 1
           else
-            curl -k -f "${BASE}/staging-api/api/health" || exit 1   # ◄--- Ajout de -k ici
+            curl -k -f "${BASE}/staging-api/health" || exit 1 
           fi
 
       - name: Cleanup old images
