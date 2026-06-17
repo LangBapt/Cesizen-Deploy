@@ -19,9 +19,10 @@ services:
       - "traefik.http.routers.api-prod.rule=PathPrefix(`/api`)"
       - "traefik.http.routers.api-prod.entrypoints=websecure"
       - "traefik.http.routers.api-prod.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.api-prod.middlewares=secure-headers@file"
       - "traefik.http.routers.api-prod.priority=20"
       - "traefik.http.services.api-prod.loadbalancer.server.port=3000"
+      - "traefik.http.middlewares.api-prod-strip.stripprefix.prefixes=/api"
+      - "traefik.http.routers.api-prod.middlewares=secure-headers@file,api-prod-strip"
     depends_on:
       - postgres-prod
     logging:
