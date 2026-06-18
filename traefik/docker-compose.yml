@@ -16,7 +16,7 @@ services:
       - web
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.dashboard.rule=PathPrefix(`/traefik`)"
+      - "traefik.http.routers.dashboard.rule=Host(`cesizen-baptiste.switzerlandnorth.cloudapp.azure.com`) && PathPrefix(`/traefik`)"
       - "traefik.http.routers.dashboard.entrypoints=websecure"
       - "traefik.http.routers.dashboard.tls.certresolver=letsencrypt"
       - "traefik.http.routers.dashboard.service=api@internal"
