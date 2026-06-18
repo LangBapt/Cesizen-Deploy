@@ -16,7 +16,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=web"
-      - "traefik.http.routers.api-staging.rule=PathPrefix(`/staging-api`)"
+      - "traefik.http.routers.api-staging.rule=Host(`cesizen-baptiste.switzerlandnorth.cloudapp.azure.com`) && PathPrefix(`/staging-api`)"
       - "traefik.http.routers.api-staging.entrypoints=websecure"
       - "traefik.http.routers.api-staging.tls.certresolver=letsencrypt"
       - "traefik.http.routers.api-staging.priority=100"
@@ -39,7 +39,7 @@ services:
       - web
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.backoffice-staging.rule=PathPrefix(`/staging`)"
+      - "traefik.http.routers.backoffice-staging.rule=Host(`cesizen-baptiste.switzerlandnorth.cloudapp.azure.com`) && PathPrefix(`/staging`)"
       - "traefik.http.routers.backoffice-staging.entrypoints=websecure"
       - "traefik.http.routers.backoffice-staging.tls.certresolver=letsencrypt"
       - "traefik.http.routers.backoffice-staging.middlewares=secure-headers@file,staging-front-strip@file"

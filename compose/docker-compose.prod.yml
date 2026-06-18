@@ -16,7 +16,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=web"
-      - "traefik.http.routers.api-prod.rule=PathPrefix(`/api`)"
+      - "traefik.http.routers.api-prod.rule=Host(`cesizen-baptiste.switzerlandnorth.cloudapp.azure.com`) && PathPrefix(`/api`)"
       - "traefik.http.routers.api-prod.entrypoints=websecure"
       - "traefik.http.routers.api-prod.tls.certresolver=letsencrypt"
       - "traefik.http.routers.api-prod.priority=100"
@@ -39,7 +39,7 @@ services:
       - web
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.backoffice-prod.rule=PathPrefix(`/`)"
+      - "traefik.http.routers.backoffice-prod.rule=Host(`cesizen-baptiste.switzerlandnorth.cloudapp.azure.com`) && PathPrefix(`/`)"
       - "traefik.http.routers.backoffice-prod.entrypoints=websecure"
       - "traefik.http.routers.backoffice-prod.tls.certresolver=letsencrypt"
       - "traefik.http.routers.backoffice-prod.middlewares=secure-headers@file"
