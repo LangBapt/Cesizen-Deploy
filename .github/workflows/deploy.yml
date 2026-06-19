@@ -13,8 +13,8 @@ on:
         options: [staging, prod]
 
 jobs:
-  if: github.event_name != 'repository_dispatch'
   gitleaks:
+  if: github.event_name != 'repository_dispatch'
     name: Check for secrets
     runs-on: ubuntu-latest
     steps:
