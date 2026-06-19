@@ -14,7 +14,6 @@ on:
 
 jobs:
   gitleaks:
-  if: github.event_name != 'repository_dispatch'
     name: Check for secrets
     runs-on: ubuntu-latest
     steps:
@@ -23,6 +22,7 @@ jobs:
           fetch-depth: 0 
 
       - name: Run Gitleaks
+        if: github.event_name != 'repository_dispatch'
         uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
